@@ -11,13 +11,16 @@ import ru.sberbank.dsmelnikov.bankapi.model.Card;
 import ru.sberbank.dsmelnikov.bankapi.model.dto.CardDto;
 import ru.sberbank.dsmelnikov.bankapi.model.enums.CardStatus;
 import ru.sberbank.dsmelnikov.bankapi.service.ClientService;
-import ru.sberbank.dsmelnikov.bankapi.service.impl.helper.ServiceHelper;
+import ru.sberbank.dsmelnikov.bankapi.service.helper.ServiceHelper;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Сервис-уровень приложения для клиента (физического лица)
+ */
 
 @Service
 public class ClientServiceImpl implements ClientService {
@@ -50,19 +53,21 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public void issueNewCardOnAccount(CardDto cardDto) {
         //Проверка DTO карты (cardDto) на null
-        if (cardDto == null)
+        if (cardDto == null) {
             throw new ApplicationException("Некорректные данные карты, null");
+        }
 
         //Проверка на валидность номера карты
-        if (!serviceHelper.validateCardNumber(cardDto.getCardNumber()))
+        if (!serviceHelper.validateCardNumber(cardDto.getCardNumber())) {
             throw new ApplicationException("Некорректный номер карты");
+        }
 
         //Получение счета из бд по id
         Account account = accountDao.getAccountById(cardDto.getAccountId());
 
         //Проверка account на null
         if (account == null) {
-            throw new ApplicationException("Некорректные данные аккаунта, null");
+            throw new ApplicationException("Некорректные данные счета, null");
         }
 
         //Формирование карты из полученных данных
@@ -71,8 +76,8 @@ public class ClientServiceImpl implements ClientService {
                 .account(account)
                 .cardStatus(CardStatus.NEW)
                 .build();
-        //Внесение карты в бд
 
+        //Внесение карты в бд
         cardDao.createCard(card);
     }
 
@@ -85,8 +90,10 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public List<CardDto> listCards(Long accountId) {
-        if (accountId <= 0)
+        //Проверка id счета
+        if (accountId <= 0) {
             throw new ApplicationException("Некорректная id счета, <= 0");
+        }
 
         //Получение всех карт, принадлежащих счету
         List<Card> accountCardList = cardDao.listCardsOnAccount(accountId);
@@ -120,34 +127,26 @@ public class ClientServiceImpl implements ClientService {
         //Получение счета из бд по id
         Account account = accountDao.getAccountById(accountId);
 
-        //Проверка account и amount на null
-        if (account == null)
-            throw new ApplicationException("Некорректные данные аккаунта, null");
-        if (amount.equals(""))
+        //Проверка account на null
+        if (account == null) {
+            throw new ApplicationException("Некорректные данные счета, null");
+        }
+        //Проверка amount на пустое значение
+        if (amount.equals("")) {
             throw new ApplicationException("Некоректная сумма для внесения на счет, empty");
+        }
 
         //Определение старой суммы на счету
         BigDecimal oldAmount;
 
         //Формирование суммы средств для внесения на счет
-        BigDecimal depositAmount;
+        BigDecimal depositAmount = serviceHelper.transformToBigDecimal(amount);
 
         try {
             oldAmount = account.getAccountBalance();
         } catch (NumberFormatException e) {
             throw new ApplicationException("Невозможно получить число из бд");
         }
-
-        try {
-            depositAmount = new BigDecimal(amount)
-                    .setScale(2, RoundingMode.HALF_EVEN);
-        } catch (NumberFormatException e) {
-            throw new ApplicationException("Невозможно получить число из предоставленного");
-        }
-
-        //Проверка вносимой суммы на ноль и отрицательное значение
-        if (depositAmount.compareTo(BigDecimal.ZERO) <= 0)
-            throw new ApplicationException("Некорректная сумма для внесения на счет, <= 0");
 
         //Суммирование вносимого депозита и старого значения
         account.setAccountBalance(oldAmount.add(depositAmount));
@@ -165,18 +164,20 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public BigDecimal checkBalance(Long accountId) {
-        Account account;
-
-        //Проверка account на null
         try {
-            account = accountDao.getAccountById(accountId);
+            //Получение счета из бд по id
+            Account account = accountDao.getAccountById(accountId);
+
+            //Проверка account на null
+            if (account == null) {
+                throw new ApplicationException("Некорректные данные счета, null");
+            }
 
             //Возврат баланса на счету
             return account.getAccountBalance();
         } catch (NullPointerException e) {
-            throw new ApplicationException("Некорректный id аккаунта, null");
+            throw new ApplicationException("Некорректный id счета, null");
         }
-
     }
 
 }

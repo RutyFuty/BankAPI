@@ -46,6 +46,6 @@ public class AccountDaoImpl implements AccountDao {
 
     @Override
     public List<Account> listAccounts() {
-        return entityManager.createQuery("from Account", Account.class).getResultList();
+        return entityManager.createQuery("from Account as acc join fetch acc.client", Account.class).getResultList();
     }
 }

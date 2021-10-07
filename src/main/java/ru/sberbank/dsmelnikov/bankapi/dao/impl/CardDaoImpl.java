@@ -43,7 +43,7 @@ public class CardDaoImpl implements CardDao {
 
     @Override
     public List<Card> listCards() {
-        return entityManager.createQuery("from Card", Card.class).getResultList();
+        return entityManager.createQuery("from Card as crd join fetch crd.account as acc join fetch acc.client", Card.class).getResultList();
     }
 
     public List<Card> listCardsOnAccount(Long accountId) {

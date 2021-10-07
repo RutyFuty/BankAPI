@@ -10,6 +10,10 @@ create sequence client_sequence
     start with 1
     increment by 1;
 
+create sequence counterparty_sequence
+    start with 1
+    increment by 1;
+
 create sequence transaction_sequence
     start with 1
     increment by 1;
@@ -35,6 +39,13 @@ create table client (
      first_name varchar(255),
       last_name varchar(255),
        middle_name varchar(255),
+        primary key (id));
+
+create table counterparty (
+    id bigint not null,
+     counterparty_status varchar(255),
+      name varchar(255),
+       account_id bigint not null,
         primary key (id));
 
 create table transaction (
@@ -63,6 +74,10 @@ alter table card
     add constraint FKcardACCID
         foreign key (account_id) references account;
 
+alter table counterparty
+    add constraint FKcntpartACCID
+        foreign key (account_id) references account;
+
 alter table transaction
     add constraint FKtransDSTACCID
         foreign key (dst_account_id) references account
@@ -72,4 +87,3 @@ alter table transaction
     add constraint FKtransSRCACCID
         foreign key (src_account_id) references account
             on delete cascade;
-

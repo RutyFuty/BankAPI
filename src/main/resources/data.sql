@@ -27,3 +27,8 @@ insert into card (id, card_number, card_status, account_id) values (card_sequenc
 insert into card (id, card_number, card_status, account_id) values (card_sequence.nextval, '5299905623451132', 'ACTIVE', '5');
 insert into card (id, card_number, card_status, account_id) values (card_sequence.nextval, '4012789312637164', 'ACTIVE', '3');
 
+
+insert into counterparty (id, counterparty_status, name, account_id) values (counterparty_sequence.nextval, 'NEW', 'Контрагент Номер 1', '1');
+insert into counterparty (id, counterparty_status, name, account_id) values (counterparty_sequence.nextval, 'ACTIVE', 'Контрагент Номер 2', '4');
+insert into counterparty (id, counterparty_status, name, account_id) values (counterparty_sequence.nextval, 'ACTIVE', 'Контрагент Номер 3', '2');
+insert into counterparty (id, counterparty_status, name, account_id) values (counterparty_sequence.nextval, 'INACTIVE', 'Контрагент Номер 4', '6');
